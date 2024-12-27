@@ -133,9 +133,14 @@ def main():
 ])
 
     # TOOD: use image folder for your train dataset
-    train_dataset = datasets.ImageFolder(
-        root=args.data_dir, transform=transform
-    )
+    if args.image_size == 32:
+        train_dataset = datasets.CIFAR10(
+            root=args.data_dir,transform=transform
+        )
+    else:
+        train_dataset = datasets.ImageFolder(
+            root=args.data_dir, transform=transform
+        )
 
     # TODO: setup dataloader
     sampler = None
