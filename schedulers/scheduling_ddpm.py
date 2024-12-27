@@ -45,11 +45,11 @@ class DDPMScheduler(nn.Module):
         if self.beta_schedule == 'linear':
             # This is the DDPM implementation
             betas = torch.linspace(self.beta_start, self.beta_end, self.num_train_timesteps)
-            self.register_buffer("betas", betas)
+        self.register_buffer("betas", betas)
 
 
         # TODO: calculate alphas
-        alphas = 1-betas
+        alphas = 1- betas
         self.register_buffer("alphas", alphas)
         # TODO: calculate alpha cumulative product
         alphas_cumprod = torch.cumprod(alphas, dim=0)
