@@ -10,7 +10,7 @@ learning_rate: 0.001 #LR
 weight_decay: 0 #WD
 num_train_timesteps: 1000000 #TRAINING_TIMESTEPS
 num_inference_steps: 35 #INFERENCE_TIMESTEPS
-beta_start: 0.002#BETA START
+beta_start: 0.002 #BETA START
 beta_end: 02 #BETA END
 beta_schedule: linear #BETA SCHEDULE
 
@@ -19,7 +19,7 @@ predictor_type: epsilon
 unet_in_size: 128
 unet_in_ch: 3
 unet_ch: 128
-unet_num_res_blocks: 2
+unet_num_res_blocks: 4
 unet_ch_mult: [1, 2, 2, 4]
 unet_attn: [2, 3]
 unet_dropout: 0.1
