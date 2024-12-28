@@ -16,6 +16,7 @@ import torch.nn.functional as F
 
 from torchvision import datasets, transforms
 from torchvision.utils  import make_grid
+from torch.cuda.amp import GradScaler, autocast
 
 from models import UNet, VAE, ClassEmbedder
 from schedulers import DDPMScheduler, DDIMScheduler
@@ -101,7 +102,9 @@ def main():
     
     # parse arguments
     args = parse_args()
-    
+
+    scaler = GradScaler()
+
     # seed everything
     seed_everything(args.seed)
     
@@ -268,7 +271,8 @@ def main():
         wandb_logger = wandb.init(
             project='ddpm', 
             name=args.run_name, 
-            config=vars(args))
+            config=vars(args)
+        )
     
     # Start training    
     if is_primary(args):
@@ -297,6 +301,12 @@ def main():
 
         optimizer = torch.optim.AdamW(unet.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
 
+        loss_m = AverageMeter()
+
+        # TODO: set unet and scheduelr to train
+        unet.train()
+        scheduler.train()
+
 
         # TODO: finish this
         for step, (images, labels) in enumerate(train_loader):
@@ -315,7 +325,6 @@ def main():
                 images = images * 0.1845
             
             # TODO: zero grad optimizer
-
             optimizer.zero_grad()
 
             
@@ -326,39 +335,44 @@ def main():
             else:
                 # NOTE: if not cfg, set class_emb to None
                 class_emb = None
-            
-            # TODO: sample noise 
-            noise = None  
-            
+
+            # TODO: sample noise
+            noise = torch.randn_like(images).to(device)
+
             # TODO: sample timestep t
-            timesteps = None 
-            
+            timesteps = torch.randint(0, args.num_train_timesteps, (batch_size,), device=device).long()
+
             # TODO: add noise to images using scheduler
-            noisy_images = None 
-            
-            # TODO: model prediction
-            model_pred = None 
-            
-            if args.prediction_type == 'epsilon':
-                target = noise 
-            
-            # TODO: calculate loss
-            loss = None 
-            
+            noisy_images = scheduler.add_noise(images, noise, timesteps)
+
+            with autocast(dtype=torch.bfloat16):  # Use mixed precision
+                model_pred = unet(noisy_images, timesteps, c=class_emb)
+
+                if args.prediction_type == 'epsilon':
+                    target = noise
+
+                assert torch.isfinite(model_pred).all(), "NaN or Inf detected in model predictions!"
+                # Calculate loss
+                loss = F.mse_loss(model_pred, target)
+
             # record loss
             loss_m.update(loss.item())
-            
-            # backward and step 
-            loss.backward()
+            if not torch.isfinite(loss) or torch.isnan(loss):
+                print(f"Warning: Loss is infinite or nan")
+
+            # backward and step
+            scaler.scale(loss).backward()
             # TODO: grad clip
             if args.grad_clip:
-                pass 
-            
-            # TODO: step your optimizer
-            optimizer
-            
+                scaler.unscale_(optimizer)
+                torch.nn.utils.clip_grad_norm_(unet.parameters(), args.grad_clip)
+
+                # TODO: step your optimizer
+            scaler.step(optimizer)
+            scaler.update()
+
             progress_bar.update(1)
-            
+
             # logger
             if step % 100 == 0 and is_primary(args):
                 logger.info(f"Epoch {epoch+1}/{args.num_epochs}, Step {step}/{num_update_steps_per_epoch}, Loss {loss.item()} ({loss_m.avg})")
@@ -398,5 +412,4 @@ def main():
 
 
 if __name__ == '__main__':
-
     main()
