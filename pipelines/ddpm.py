@@ -96,12 +96,12 @@ class DDPMPipeline:
         for t in self.progress_bar(self.scheduler.timesteps):
             
             # NOTE: this is for CFG
-            if guidance_scale is not None or guidance_scale != 1.0:
+            if guidance_scale is not None and guidance_scale != 1.0:
                 # TODO: implement cfg
-                model_input = None 
-                c = None 
+                model_input = torch.cat([image] * 2)
+                c = torch.cat([uncond_embeds, class_embeds])
             else:
-                model_input = None 
+                model_input = image
                 # NOTE: leave c as None if you are not using CFG
                 c = None
             

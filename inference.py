@@ -138,10 +138,9 @@ def main():
             logger.info(f"Batch at index {i} done")
     
     # TODO: load validation images as reference batch
-
+    all_images = torch.cat(all_images, dim=0)
     
     # TODO: using torchmetrics for evaluation, check the documents of torchmetrics
-    import torchmetrics 
 
     from torchmetrics.image.fid import FrechetInceptionDistance
     from torchmetrics.image.inception import InceptionScore
