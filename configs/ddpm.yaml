@@ -3,10 +3,10 @@ seed: 31
 data_dir: ./data
 output_dir: ./experiments
 image_size: 32
-batch_size: 128 #BATCH_SIZE
+batch_size: 64 #BATCH_SIZE
 num_workers: 4 #NUM_WORKERS
 num_classes: 512 #NUM_CLASSES
-num_epochs: 40 #NUM_EPOCHS
+num_epochs: 20 #NUM_EPOCHS
 learning_rate: 0.001 #LR
 weight_decay: 0 #WD
 num_train_timesteps: 1000000 #TRAINING_TIMESTEPS
@@ -24,5 +24,9 @@ unet_num_res_blocks: 4
 unet_ch_mult: [1, 2, 2, 4]
 unet_attn: [2, 3]
 unet_dropout: 0.1
+
+use_ddim: false
+use_cfg: false
+cfg_guidance_scale: 1.0
 
 ckpt: ./
