@@ -10,6 +10,8 @@ from logging import getLogger as get_logger
 from tqdm import tqdm 
 from PIL import Image
 import torch.nn.functional as F
+from torchvision import datasets, transforms
+import wandb
 
 from torchvision.utils  import make_grid
 
@@ -29,7 +31,7 @@ def main():
     
     # seed everything
     seed_everything(args.seed)
-    generator = torch.Generator(device=device)
+    generator = torch.Generator(device="cuda" if torch.cuda.is_available() else "cpu")
     generator.manual_seed(args.seed)
     
     # setup logging
@@ -51,7 +53,11 @@ def main():
     logger.info(f"Number of parameters: {num_params / 10 ** 6:.2f}M")
     
     # TODO: ddpm shceduler
-    scheduler = DDPMScheduler(None )
+    scheduler = DDPMScheduler(
+        num_train_timesteps=args.num_train_timesteps, beta_start=args.beta_start,
+        beta_end=args.beta_end, beta_schedule=args.beta_schedule, variance_type=args.variance_type,
+        prediction_type=args.prediction_type, clip_sample=args.clip_sample, clip_sample_range=args.clip_sample_range
+    )
     # vae 
     vae = None
     if args.latent_ddpm:        
@@ -74,19 +80,40 @@ def main():
         
     # scheduler
     if args.use_ddim:
-        shceduler_class = DDIMScheduler
+        scheduler_class = DDIMScheduler
     else:
-        shceduler_class = DDPMScheduler
+        scheduler_class = DDPMScheduler
+
+
     # TOOD: scheduler
-    scheduler = shceduler_class(None)
+    scheduler = scheduler_class(None)
 
     # load checkpoint
     load_checkpoint(unet, scheduler, vae=vae, class_embedder=class_embedder, checkpoint_path=args.ckpt)
     
     # TODO: pipeline
-    pipeline = DDPMPipeline(None)
+    pipeline = DDPMPipeline(
+        unet=unet,
+        scheduler=scheduler,
+        vae=vae,
+        class_embedder=class_embedder
+    )
 
-    
+    val_transform = transforms.Compose([
+        transforms.Resize((args.image_size, args.image_size)),  # Resize to match generated image size
+        transforms.ToTensor(),
+        transforms.Normalize((0.5,), (0.5,))
+    ])
+    val_dataset = datasets.ImageFolder(root="/content/hw5_code/data/imagenet100_128x128/validation", transform=val_transform)
+    val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False)
+
+    # WandB
+    wandb.login(key="1f3706552b048908152fb1d827203f07685d8ef7")
+    wandb_logger = wandb.init(
+            project='ddpm',
+            name="Inference 1",
+            config=vars(args))
+
     logger.info("***** Running Infrence *****")
     
     # TODO: we run inference to generation 5000 images
@@ -98,26 +125,53 @@ def main():
             logger.info(f"Generating 50 images for class {i}")
             batch_size = 50
             classes = torch.full((batch_size,), i, dtype=torch.long, device=device)
-            gen_images = None 
-            all_images.append(gen_images)
+            gen_images_pil = pipeline(batch_size=batch_size, num_inference_steps=args.num_inference_steps, classes=classes, guidance_scale=args.cfg_guidance_scale, generator=generator, device=device)
+            gen_images_tensor = torch.stack([val_transform(img) for img in gen_images_pil])
+            all_images.append(gen_images_tensor)
     else:
         # generate 5000 images
-        for _ in tqdm(range(0, 5000, batch_size)):
-            gen_images = None 
-            all_images.append(gen_images)
+        batch_size = args.batch_size
+        for i in tqdm(range(0, 5000, batch_size)):
+            gen_images_pil = pipeline(batch_size=args.batch_size, num_inference_steps=args.num_inference_steps, generator=generator, device=device)
+            gen_images_tensor = torch.stack([val_transform(img) for img in gen_images_pil])
+            all_images.append(gen_images_tensor)
+            logger.info(f"Batch at index {i} done")
     
     # TODO: load validation images as reference batch
-    
+
     
     # TODO: using torchmetrics for evaluation, check the documents of torchmetrics
     import torchmetrics 
-    
-    from torchmetrics.image.fid import FrechetInceptionDistance, InceptionScore
-    
+
+    from torchmetrics.image.fid import FrechetInceptionDistance
+    from torchmetrics.image.inception import InceptionScore
+
+    fid_metric = FrechetInceptionDistance(feature=2048).to(device)
+    is_metric = InceptionScore(feature=2048).to(device)
     # TODO: compute FID and IS
-    
-        
-    
+
+    with torch.no_grad():
+        # Move all_images to the device before updating the FID metric
+        all_images = all_images.to(device)
+
+        # Update with real images (validation set)
+        for images, _ in val_loader:
+            images = (images * 127.5 + 127.5).clamp(0, 255).to(torch.uint8).to(device)
+            fid_metric.update(images, real=True)
+
+        # Update with generated images
+        all_images = (all_images * 127.5 + 127.5).clamp(0, 255).to(torch.uint8).to(device)
+        fid_metric.update(all_images, real=False)
+        is_metric.update(all_images)
+
+    # Compute FID and IS
+    fid_score = fid_metric.compute()
+    is_score, _ = is_metric.compute()
+
+    logger.info(f"Frechet Inception Distance (FID): {fid_score}")
+    logger.info(f"Inception Score (IS): {is_score}")
+
+    wandb_logger.finish()
 
 
 if __name__ == '__main__':

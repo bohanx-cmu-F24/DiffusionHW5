@@ -1,16 +1,16 @@
-import os 
-import sys 
+import os
+import sys
 import argparse
 import numpy as np
 import ruamel.yaml as yaml
 import torch
 import torchmetrics
-import wandb 
-import logging 
+import wandb
+import logging
 from logging import getLogger as get_logger
 
 from torch.utils.data import Dataset, DataLoader
-from tqdm import tqdm 
+from tqdm import tqdm
 from PIL import Image
 import torch.nn.functional as F
 
@@ -29,12 +29,12 @@ logger = get_logger(__name__)
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Train a model.")
-    
+
     # config file
     parser.add_argument("--config", type=str, default='configs/ddpm.yaml', help="config file used to specify parameters")
 
-    # data 
-    parser.add_argument("--data_dir", type=str, default='./data/imagenet100_128x128/train', help="data folder") 
+    # data
+    parser.add_argument("--data_dir", type=str, default='./data/imagenet100_128x128/train', help="data folder")
     parser.add_argument("--image_size", type=int, default=128, help="image size")
     parser.add_argument("--batch_size", type=int, default=4, help="per gpu batch size")
     parser.add_argument("--num_workers", type=int, default=8, help="batch size")
@@ -49,7 +49,7 @@ def parse_args():
     parser.add_argument("--grad_clip", type=float, default=1.0, help="gradient clip")
     parser.add_argument("--seed", type=int, default=42, help="random seed")
     parser.add_argument("--mixed_precision", type=str, default='none', choices=['fp16', 'bf16', 'fp32', 'none'], help='mixed precision')
-    
+
     # ddpm
     parser.add_argument("--num_train_timesteps", type=int, default=1000, help="ddpm training timesteps")
     parser.add_argument("--num_inference_steps", type=int, default=200, help="ddpm inference timesteps")
@@ -60,7 +60,7 @@ def parse_args():
     parser.add_argument("--prediction_type", type=str, default='epsilon', help="ddpm epsilon type")
     parser.add_argument("--clip_sample", type=str2bool, default=True, help="whether to clip sample at each step of reverse process")
     parser.add_argument("--clip_sample_range", type=float, default=1.0, help="clip sample range")
-    
+
     # unet
     parser.add_argument("--unet_in_size", type=int, default=128, help="unet input image size")
     parser.add_argument("--unet_in_ch", type=int, default=3, help="unet input channel size")
@@ -69,37 +69,37 @@ def parse_args():
     parser.add_argument("--unet_attn", type=int, default=[1, 2, 3], nargs='+', help="unet attantion stage index")
     parser.add_argument("--unet_num_res_blocks", type=int, default=2, help="unet number of res blocks")
     parser.add_argument("--unet_dropout", type=float, default=0.0, help="unet dropout")
-    
+
     # vae
     parser.add_argument("--latent_ddpm", type=str2bool, default=False, help="use vqvae for latent ddpm")
-    
+
     # cfg
     parser.add_argument("--use_cfg", type=str2bool, default=False, help="use cfg for conditional (latent) ddpm")
     parser.add_argument("--cfg_guidance_scale", type=float, default=2.0, help="cfg for inference")
-    
+
     # ddim sampler for inference
     parser.add_argument("--use_ddim", type=str2bool, default=False, help="use ddim sampler for inference")
-    
+
     # checkpoint path for inference
     parser.add_argument("--ckpt", type=str, default=None, help="checkpoint path for inference")
-    
+
     # first parse of command-line args to check for config file
     args = parser.parse_args()
-    
+
     # If a config file is specified, load it and set defaults
     if args.config is not None:
         with open(args.config, 'r', encoding='utf-8') as f:
             file_yaml = yaml.YAML()
             config_args = file_yaml.load(f)
             parser.set_defaults(**config_args)
-    
+
     # re-parse command-line args to overwrite with any command-line inputs
     args = parser.parse_args()
     return args
-    
-    
+
+
 def main():
-    
+
     # parse arguments
     args = parse_args()
 
@@ -107,16 +107,16 @@ def main():
 
     # seed everything
     seed_everything(args.seed)
-    
+
     # setup logging
     logging.basicConfig(
         format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
         datefmt="%m/%d/%Y %H:%M:%S",
         level=logging.INFO,
     )
-    
+
     # setup distributed initialize and device
-    device = init_distributed_device(args) 
+    device = init_distributed_device(args)
     if args.distributed:
         logger.info(
             'Training in distributed mode with multiple processes, 1 device per process.'
@@ -124,8 +124,8 @@ def main():
     else:
         logger.info(f'Training with a single process on 1 device ({args.device}).')
     assert args.rank >= 0
-    
-    
+
+
     # setup dataset
     logger.info("Creating dataset")
     # TODO: use transform to normalize your images to [-1, 1]
@@ -164,9 +164,9 @@ def main():
     )
 
     # calculate total batch_size
-    total_batch_size = args.batch_size * args.world_size 
+    total_batch_size = args.batch_size * args.world_size
     args.total_batch_size = total_batch_size
-    
+
     # setup experiment folder
     if args.run_name is None:
         args.run_name = f'exp-{len(os.listdir(args.output_dir))}'
@@ -178,7 +178,7 @@ def main():
     if is_primary(args):
         os.makedirs(output_dir, exist_ok=True)
         os.makedirs(save_dir, exist_ok=True)
-    
+
     # setup model
     logger.info("Creating model")
     # unet
@@ -186,7 +186,7 @@ def main():
     # preint number of parameters
     num_params = sum(p.numel() for p in unet.parameters() if p.requires_grad)
     logger.info(f"Number of parameters: {num_params / 10 ** 6:.2f}M")
-    
+
     # TODO: ddpm shceduler
     scheduler = DDPMScheduler(
         num_train_timesteps=args.num_train_timesteps, beta_start=args.beta_start,
@@ -194,20 +194,20 @@ def main():
         prediction_type=args.prediction_type, clip_sample=args.clip_sample, clip_sample_range=args.clip_sample_range
     )
 
-    # NOTE: this is for latent DDPM 
+    # NOTE: this is for latent DDPM
     vae = None
     if args.latent_ddpm:
         vae = VAE()
         # NOTE: do not change this
         vae.init_from_ckpt('pretrained/model.ckpt')
         vae.eval()
-        
+
     # Note: this is for cfg
     class_embedder = None
     if args.use_cfg:
-        # TODO: 
+        # TODO:
         class_embedder = ClassEmbedder(None)
-        
+
     # send to device
     unet = unet.to(device)
     scheduler = scheduler.to(device)
@@ -215,7 +215,7 @@ def main():
         vae = vae.to(device)
     if class_embedder:
         class_embedder = class_embedder.to(device)
-    
+
     # TODO: setup optimizer
     optimizer = torch.optim.AdamW(unet.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
     # TODO: setup scheduler
@@ -223,7 +223,7 @@ def main():
     # max train steps
     num_update_steps_per_epoch = len(train_loader)
     args.max_train_steps = args.num_epochs * num_update_steps_per_epoch
-    
+
     #  setup distributed training
     if args.distributed:
         unet = torch.nn.parallel.DistributedDataParallel(
@@ -248,7 +248,7 @@ def main():
         )
     else:
         scheduler_wo_ddp = scheduler
-    
+
     # TODO: setup evaluation pipeline
     # NOTE: this pipeline is not differentiable and only for evaluation
 
@@ -271,12 +271,12 @@ def main():
     if is_primary(args):
         wandb.login(key="1f3706552b048908152fb1d827203f07685d8ef7")
         wandb_logger = wandb.init(
-            project='ddpm', 
-            name=args.run_name, 
+            project='ddpm',
+            name=args.run_name,
             config=vars(args)
         )
-    
-    # Start training    
+
+    # Start training
     if is_primary(args):
         logger.info("***** Training arguments *****")
         logger.info(args)
@@ -292,11 +292,11 @@ def main():
 
     # training
     for epoch in range(args.num_epochs):
-        
+
         # set epoch for distributed sampler, this is for distribution training
         if hasattr(train_loader.sampler, 'set_epoch'):
             train_loader.sampler.set_epoch(epoch)
-        
+
         args.epoch = epoch
         if is_primary(args):
             logger.info(f"Epoch {epoch+1}/{args.num_epochs}")
@@ -312,28 +312,28 @@ def main():
 
         # TODO: finish this
         for step, (images, labels) in enumerate(train_loader):
-            
+
             batch_size = images.size(0)
-            
+
             # TODO: send to device
             images = images.to(device)
             labels = labels.to(device)
-            
-            # NOTE: this is for latent DDPM 
+
+            # NOTE: this is for latent DDPM
             if vae is not None:
                 # use vae to encode images as latents
-                images = None 
+                images = None
                 # NOTE: do not change  this line, this is to ensure the latent has unit std
                 images = images * 0.1845
-            
+
             # TODO: zero grad optimizer
             optimizer.zero_grad()
 
-            
+
             # NOTE: this is for CFG
             if class_embedder is not None:
                 # TODO: use class embedder to get class embeddings
-                class_emb = None 
+                class_emb = None
             else:
                 # NOTE: if not cfg, set class_emb to None
                 class_emb = None
@@ -382,20 +382,20 @@ def main():
 
         # validation
         # send unet to evaluation mode
-        unet.eval()        
+        unet.eval()
         generator = torch.Generator(device=device)
         generator.manual_seed(epoch + args.seed)
-        
+
         # NOTE: this is for CFG
         if args.use_cfg:
             # random sample 4 classes
             classes = torch.randint(0, args.num_classes, (4,), device=device)
             # TODO: fill pipeline
-            gen_images = pipeline(None) 
+            gen_images = pipeline(None)
         else:
             # TODO: fill pipeline
-            gen_images = pipeline(None) 
-            
+            gen_images = pipeline(batch_size=args.batch_size, num_inference_steps=args.num_inference_steps, generator=generator, device=device)
+
         # create a blank canvas for the grid
         grid_image = Image.new('RGB', (4 * args.image_size, 1 * args.image_size))
         # paste images into the grid
@@ -403,11 +403,11 @@ def main():
             x = (i % 4) * args.image_size
             y = 0
             grid_image.paste(image, (x, y))
-        
+
         # Send to wandb
         if is_primary(args):
             wandb_logger.log({'gen_images': wandb.Image(grid_image)})
-            
+
         # save checkpoint
         if is_primary(args):
             save_checkpoint(unet_wo_ddp, scheduler_wo_ddp, vae_wo_ddp, class_embedder, optimizer, epoch, save_dir=save_dir)

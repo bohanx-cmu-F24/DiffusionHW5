@@ -24,3 +24,5 @@ unet_num_res_blocks: 4
 unet_ch_mult: [1, 2, 2, 4]
 unet_attn: [2, 3]
 unet_dropout: 0.1
+
+ckpt: ./
