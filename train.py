@@ -265,9 +265,10 @@ def main():
             # Use the round_trip_dump method to preserve the order and style
             file_yaml = yaml.YAML()
             file_yaml.dump(experiment_config, f)
-    
+
     # start tracker
     if is_primary(args):
+        wandb.login(key="1f3706552b048908152fb1d827203f07685d8ef7")
         wandb_logger = wandb.init(
             project='ddpm', 
             name=args.run_name, 
@@ -367,7 +368,7 @@ def main():
                 scaler.unscale_(optimizer)
                 torch.nn.utils.clip_grad_norm_(unet.parameters(), args.grad_clip)
 
-                # TODO: step your optimizer
+            # TODO: step your optimizer
             scaler.step(optimizer)
             scaler.update()
 
