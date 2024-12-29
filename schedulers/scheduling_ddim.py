@@ -121,8 +121,6 @@ class DDIMScheduler(DDPMScheduler):
             variance_noise = randn_tensor(
                     model_output.shape, generator=generator, device=model_output.device, dtype=model_output.dtype
             )
-            variance = None
-
             prev_sample = prev_sample + std_dev_t * variance_noise
         
         return prev_sample

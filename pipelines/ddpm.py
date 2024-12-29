@@ -104,7 +104,11 @@ class DDPMPipeline:
                 model_input = image
                 # NOTE: leave c as None if you are not using CFG
                 c = None
-            
+
+
+            #Check Model Input is not NaN
+            assert torch.isfinite(model_input).all(), "NaN or Inf detected in model predictions!"
+
             # TODO: 1. predict noise model_output
             model_output = self.unet(model_input, t, c)
 
@@ -113,7 +117,8 @@ class DDPMPipeline:
                 uncond_model_output, cond_model_output = model_output.chunk(2)
                 model_output = model_output
 
-            print(model_output)
+            assert torch.isfinite(model_output).all(), "NaN or Inf detected in model predictions!"
+
             # TODO: 2. compute previous image: x_t -> x_t-1 using scheduler
             image = self.scheduler.step(model_output, t, image, generator=generator)
             

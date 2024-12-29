@@ -258,7 +258,6 @@ class DDPMScheduler(nn.Module):
         pred_prev_sample = pred_original_sample_coeff * pred_original_sample + current_sample_coeff * sample
 
 
-
         # 6. Add noise
         variance = 0
         if t > 0:
