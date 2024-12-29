@@ -1,6 +1,7 @@
 
 from typing import List, Optional, Tuple, Union
 from PIL import Image
+from openpyxl.styles.builtins import output
 from tqdm import tqdm
 import torch 
 import torch.nn as nn
@@ -108,6 +109,7 @@ class DDPMPipeline:
             # TODO: 1. predict noise model_output
             model_output = self.unet(model_input, t, c)
 
+            print(model_output)
             
             if guidance_scale is not None or guidance_scale != 1.0:
                 # TODO: implement cfg
