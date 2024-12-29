@@ -114,7 +114,7 @@ class DDPMPipeline:
             if guidance_scale is not None or guidance_scale != 1.0:
                 # TODO: implement cfg
                 uncond_model_output, cond_model_output = model_output.chunk(2)
-                model_output = None
+                model_output = model_output
             
             # TODO: 2. compute previous image: x_t -> x_t-1 using scheduler
             image = self.scheduler.step(model_output, t, image, generator=generator)
