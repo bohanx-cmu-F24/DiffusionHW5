@@ -251,7 +251,7 @@ class DDPMScheduler(nn.Module):
 
         # TODO: 4. Compute coefficients for pred_original_sample x_0 and current sample x_t
         # See formula (7) from https://arxiv.org/pdf/2006.11239.pdf
-        pred_original_sample_coeff = (sample - torch.sqrt(beta_prod_t) * model_output) / torch.sqrt(alpha_prod_t)
+        pred_original_sample_coeff = torch.sqrt(alpha_prod_t_prev) * current_beta_t / beta_prod_t
         current_sample_coeff = torch.sqrt(current_alpha_t) * beta_prod_t_prev / beta_prod_t
 
         # 5. Compute predicted previous sample µ_t

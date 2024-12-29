@@ -5,6 +5,7 @@ import numpy as np
 import ruamel.yaml as yaml
 import torch
 import torchmetrics
+import gc
 import wandb
 import logging
 from logging import getLogger as get_logger
@@ -237,6 +238,7 @@ def main():
         unet_wo_ddp = unet
         class_embedder_wo_ddp = class_embedder
     vae_wo_ddp = vae
+
     # TODO: setup ddim
     if args.use_ddim:
         scheduler_wo_ddp = DDIMScheduler(
@@ -380,6 +382,10 @@ def main():
                 logger.info(f"Epoch {epoch+1}/{args.num_epochs}, Step {step}/{num_update_steps_per_epoch}, Loss {loss.item()} ({loss_m.avg})")
                 wandb_logger.log({'loss': loss_m.avg})
 
+            del noisy_images, noise, timesteps, model_pred, target
+            torch.cuda.empty_cache()
+            gc.collect()
+
         # validation
         # send unet to evaluation mode
         unet.eval()
@@ -412,6 +418,9 @@ def main():
         if is_primary(args):
             save_checkpoint(unet_wo_ddp, scheduler_wo_ddp, vae_wo_ddp, class_embedder, optimizer, epoch, save_dir=save_dir)
 
+        del gen_images, grid_image
+        torch.cuda.empty_cache()
+        gc.collect()
 
 if __name__ == '__main__':
     main()
