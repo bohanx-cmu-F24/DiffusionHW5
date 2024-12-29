@@ -220,7 +220,10 @@ def main():
     # TODO: setup optimizer
     optimizer = torch.optim.AdamW(unet.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
     # TODO: setup scheduler
-
+    lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+        optimizer,
+        T_max=args.num_epochs
+    )
     # max train steps
     num_update_steps_per_epoch = len(train_loader)
     args.max_train_steps = args.num_epochs * num_update_steps_per_epoch
@@ -381,6 +384,8 @@ def main():
             if step % 100 == 0 and is_primary(args):
                 logger.info(f"Epoch {epoch+1}/{args.num_epochs}, Step {step}/{num_update_steps_per_epoch}, Loss {loss.item()} ({loss_m.avg})")
                 wandb_logger.log({'loss': loss_m.avg})
+
+            lr_scheduler.step()
 
             del noisy_images, noise, timesteps, model_pred, target
             torch.cuda.empty_cache()

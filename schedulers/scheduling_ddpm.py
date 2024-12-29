@@ -3,7 +3,6 @@ from typing import List, Optional, Tuple, Union
 import torch 
 import torch.nn as nn 
 import numpy as np
-from sympy.physics.units import current
 
 from utils import randn_tensor
 
