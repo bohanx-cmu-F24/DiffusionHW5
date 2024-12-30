@@ -94,7 +94,6 @@ class DDPMPipeline:
         
         # TODO: inverse diffusion process with for loop
         for t in self.progress_bar(self.scheduler.timesteps):
-            
             # NOTE: this is for CFG
             if guidance_scale is not None and guidance_scale != 1.0:
                 # TODO: implement cfg

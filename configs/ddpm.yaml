@@ -9,10 +9,10 @@ num_classes: 512 #NUM_CLASSES
 num_epochs: 20 #NUM_EPOCHS
 learning_rate: 0.001 #LR
 weight_decay: 0 #WD
-num_train_timesteps: 1000 #TRAINING_TIMESTEPS
-num_inference_steps: 35 #INFERENCE_TIMESTEPS
+num_train_timesteps: 3000 #TRAINING_TIMESTEPS
+num_inference_steps: 300 #INFERENCE_TIMESTEPS
 beta_start: 0.002 #BETA START
-beta_end: 02 #BETA END
+beta_end: 0.2 #BETA END
 beta_schedule: linear #BETA SCHEDULE
 
 variance_type: fixed_small
