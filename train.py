@@ -165,6 +165,8 @@ def main():
         pin_memory=True
     )
 
+    accum_size = args.accumulation_step
+
     # calculate total batch_size
     total_batch_size = args.batch_size * args.world_size
     args.total_batch_size = total_batch_size
@@ -315,6 +317,8 @@ def main():
         unet.train()
         scheduler.train()
 
+        # Zero Grad Optimizer, do it out due to gradient accumulation
+        optimizer.zero_grad()
 
         # TODO: finish this
         for step, (images, labels) in enumerate(train_loader):
@@ -331,9 +335,6 @@ def main():
                 images = None
                 # NOTE: do not change  this line, this is to ensure the latent has unit std
                 images = images * 0.1845
-
-            # TODO: zero grad optimizer
-            optimizer.zero_grad()
 
 
             # NOTE: this is for CFG
@@ -368,17 +369,20 @@ def main():
             if not torch.isfinite(loss) or torch.isnan(loss):
                 print(f"Warning: Loss is infinite or nan")
 
-            # backward and step
+            # backward and step, with accumulation
+            loss = loss/accum_size
             scaler.scale(loss).backward()
 
-            # TODO: grad clip
-            if args.grad_clip:
-                scaler.unscale_(optimizer)
-                torch.nn.utils.clip_grad_norm_(unet.parameters(), args.grad_clip)
+            if not step%accum_size:
+                # TODO: grad clip
+                if args.grad_clip:
+                    scaler.unscale_(optimizer)
+                    torch.nn.utils.clip_grad_norm_(unet.parameters(), args.grad_clip)
 
-            # TODO: step your optimizer
-            scaler.step(optimizer)
-            scaler.update()
+                # TODO: step your optimizer
+                scaler.step(optimizer)
+                scaler.update()
+                optimizer.zero_grad()
 
             progress_bar.update(1)
 
