@@ -4,6 +4,7 @@ import argparse
 import numpy as np
 import ruamel.yaml as yaml
 import torch
+from torch.utils.data import DataLoader
 import wandb 
 import logging 
 from logging import getLogger as get_logger
@@ -52,13 +53,7 @@ def main():
     num_params = sum(p.numel() for p in unet.parameters() if p.requires_grad)
     logger.info(f"Number of parameters: {num_params / 10 ** 6:.2f}M")
     
-    # TODO: ddpm shceduler
-    scheduler = DDPMScheduler(
-        num_train_timesteps=args.num_train_timesteps, beta_start=args.beta_start,
-        beta_end=args.beta_end, beta_schedule=args.beta_schedule, variance_type=args.variance_type,
-        prediction_type=args.prediction_type, clip_sample=args.clip_sample, clip_sample_range=args.clip_sample_range
-    )
-    # vae 
+    # vae
     vae = None
     if args.latent_ddpm:        
         vae = VAE()
@@ -71,8 +66,7 @@ def main():
         class_embedder = ClassEmbedder(None)
         
     # send to device
-    unet = unet.to(device)
-    scheduler = scheduler.to(device)
+
     if vae:
         vae = vae.to(device)
     if class_embedder:
@@ -86,8 +80,16 @@ def main():
 
 
     # TOOD: scheduler
-    scheduler = scheduler_class(None)
+    scheduler = scheduler_class(
+        num_train_timesteps=args.num_train_timesteps,
+        num_inference_steps=args.num_inference_steps,
+        beta_start=args.beta_start,
+        beta_end=args.beta_end,
+        beta_schedule=args.beta_schedule
+    )
 
+    unet = unet.to(device)
+    scheduler = scheduler.to(device)
     # load checkpoint
     load_checkpoint(unet, scheduler, vae=vae, class_embedder=class_embedder, checkpoint_path=args.ckpt)
     
@@ -105,7 +107,7 @@ def main():
         transforms.Normalize((0.5,), (0.5,))
     ])
     val_dataset = datasets.ImageFolder(root="/content/hw5_code/data/imagenet100_128x128/validation", transform=val_transform)
-    val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False)
+    val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False)
 
     # WandB
     wandb.login(key="1f3706552b048908152fb1d827203f07685d8ef7")

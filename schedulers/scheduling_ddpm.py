@@ -55,7 +55,7 @@ class DDPMScheduler(nn.Module):
         self.register_buffer("alphas_cumprod", alphas_cumprod)
         
         # TODO: timesteps
-        timesteps = torch.linspace(-10, 10,num_train_timesteps)
+        timesteps = torch.linspace(0,num_train_timesteps,num_train_timesteps)
         self.register_buffer("timesteps", timesteps)
         
 
@@ -80,7 +80,7 @@ class DDPMScheduler(nn.Module):
                 f" {self.num_train_timesteps} as the unet model trained with this scheduler can only handle"
                 f" maximal {self.num_train_timesteps} timesteps."
             )
-            
+
         timesteps = np.arange(0, self.num_train_timesteps, self.num_train_timesteps // num_inference_steps)[::-1]
         self.timesteps = torch.from_numpy(timesteps.copy()).to(device)
 

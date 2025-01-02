@@ -37,7 +37,8 @@ def parse_args():
     # data
     parser.add_argument("--data_dir", type=str, default='./data/imagenet100_128x128/train', help="data folder")
     parser.add_argument("--image_size", type=int, default=128, help="image size")
-    parser.add_argument("--batch_size", type=int, default=4, help="per gpu batch size")
+    parser.add_argument("--batch_size", type=int, default=64, help="per gpu batch size")
+    parser.add_argument("--accumulation_step", type=int, default=2, help="per gpu batch size")
     parser.add_argument("--num_workers", type=int, default=8, help="batch size")
     parser.add_argument("--num_classes", type=int, default=100, help="number of classes in dataset")
 
@@ -369,6 +370,7 @@ def main():
 
             # backward and step
             scaler.scale(loss).backward()
+
             # TODO: grad clip
             if args.grad_clip:
                 scaler.unscale_(optimizer)

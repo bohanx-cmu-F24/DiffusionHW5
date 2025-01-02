@@ -4,6 +4,8 @@ data_dir: ./data
 output_dir: ./experiments
 image_size: 32
 batch_size: 64 #BATCH_SIZE
+accumulation_step: 4
+
 num_workers: 4 #NUM_WORKERS
 num_classes: 512 #NUM_CLASSES
 num_epochs: 20 #NUM_EPOCHS
