@@ -106,7 +106,15 @@ def main():
         transforms.ToTensor(),
         transforms.Normalize((0.5,), (0.5,))
     ])
-    val_dataset = datasets.ImageFolder(root="/content/hw5_code/data/imagenet100_128x128/validation", transform=val_transform)
+    if args.image_size == 32:
+        val_dataset = datasets.CIFAR10(
+            root=args.data_dir,transform=val_transform
+        )
+    else:
+        val_dataset = datasets.ImageFolder(
+            root=args.data_dir, transform=val_transform
+        )
+
     val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False)
 
     # WandB

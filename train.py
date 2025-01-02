@@ -17,6 +17,7 @@ import torch.nn.functional as F
 
 from torchvision import datasets, transforms
 from torchvision.utils  import make_grid
+
 from torch.cuda.amp import GradScaler, autocast
 
 from models import UNet, VAE, ClassEmbedder
@@ -227,6 +228,8 @@ def main():
         optimizer,
         T_max=args.num_epochs
     )
+
+
     # max train steps
     num_update_steps_per_epoch = len(train_loader)
     args.max_train_steps = args.num_epochs * num_update_steps_per_epoch
@@ -332,7 +335,7 @@ def main():
             # NOTE: this is for latent DDPM
             if vae is not None:
                 # use vae to encode images as latents
-                images = None
+                images = vae.encode(images)
                 # NOTE: do not change  this line, this is to ensure the latent has unit std
                 images = images * 0.1845
 
