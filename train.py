@@ -146,7 +146,7 @@ def main():
         )
     else:
         train_dataset = datasets.ImageFolder(
-            root=args.data_dir, transform=transform
+            root=os.path.join(args.data_dir,"imagenet100_128x128/imagenet100_128x128/train"), transform=transform
         )
 
     # TODO: setup dataloader
