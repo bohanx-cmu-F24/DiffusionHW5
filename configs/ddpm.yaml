@@ -2,17 +2,17 @@ run_name: ddpm
 seed: 31
 data_dir: ./data
 output_dir: ./experiments
-image_size: 32
-batch_size: 64 #BATCH_SIZE
-accumulation_step: 4
-num_workers: 4 #NUM_WORKERS
+image_size: 128
+batch_size: 12 #BATCH_SIZE
+accumulation_step: 16
+num_workers: 6 #NUM_WORKERS
 num_classes: 1024 #NUM_CLASSES
 num_epochs: 10 #NUM_EPOCHS
 learning_rate: 0.0001 #LR
 weight_decay: 0.0001 #WD
-num_train_timesteps: 2500 #TRAINING_TIMESTEPS
-num_inference_steps: 300 #INFERENCE_TIMESTEPS
-beta_start: 0.0002 #BETA START
+num_train_timesteps: 5000 #TRAINING_TIMESTEPS
+num_inference_steps: 400 #INFERENCE_TIMESTEPS
+beta_start: 0.00002 #BETA START
 beta_end: 0.002 #BETA END
 beta_schedule: linear #BETA SCHEDULE
 
