@@ -134,6 +134,7 @@ def main():
     # TODO: use transform to normalize your images to [-1, 1]
     # TODO: you can also use horizontal flip
     transform = transforms.Compose([
+    transforms.Resize((args.image_size, args.image_size)),
     transforms.ToTensor(),
     transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5)),  # Normalize to [-1, 1]
     transforms.RandomHorizontalFlip(p=0.5)
