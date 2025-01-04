@@ -28,6 +28,8 @@ unet_dropout: 0.05
 
 use_ddim: true
 use_cfg: false
+latent_ddpm: true
 cfg_guidance_scale: 2.0
 
 ckpt: experiments/exp-32-ddpm/checkpoints/checkpoint_epoch_19.pth
+wandb_key: 1f3706552b048908152fb1d827203f07685d8ef7

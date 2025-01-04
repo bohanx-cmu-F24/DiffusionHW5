@@ -10,6 +10,7 @@ import wandb
 import logging
 from logging import getLogger as get_logger
 
+from fsspec.registry import default
 from torch.utils.data import Dataset, DataLoader
 from tqdm import tqdm
 from PIL import Image
@@ -86,6 +87,8 @@ def parse_args():
     # checkpoint path for inference
     parser.add_argument("--ckpt", type=str, default=None, help="checkpoint path for inference")
 
+    #wandb
+    parser.add_argument("--wandb_key",type=str,default=None, help="wandb login key")
     # first parse of command-line args to check for config file
     args = parser.parse_args()
 
@@ -281,7 +284,7 @@ def main():
 
     # start tracker
     if is_primary(args):
-        wandb.login(key="1f3706552b048908152fb1d827203f07685d8ef7")
+        wandb.login(key=args.wandb_key)
         wandb_logger = wandb.init(
             project='ddpm',
             name=args.run_name,
