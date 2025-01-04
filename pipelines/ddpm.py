@@ -80,11 +80,11 @@ class DDPMPipeline:
                 classes = torch.tensor(classes, device=device)
             
             # TODO: get uncond classes
-            uncond_classes = None 
+            uncond_classes = torch.full((batch_size,), self.class_embedder.num_classes, device=device)
             # TODO: get class embeddings from classes
-            class_embeds = None 
+            class_embeds = self.class_embedder(classes)
             # TODO: get uncon class embeddings
-            uncond_embeds = None 
+            uncond_embeds = self.class_embedder(uncond_classes)
         
         # TODO: starts with random noise
         image = randn_tensor(image_shape, generator=generator, device=device)

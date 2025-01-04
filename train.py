@@ -215,7 +215,7 @@ def main():
     class_embedder = None
     if args.use_cfg:
         # TODO:
-        class_embedder = ClassEmbedder(None)
+        class_embedder = ClassEmbedder(embed_dim=128, n_classes=args.num_classes)
 
     # send to device
     unet = unet.to(device)
@@ -347,7 +347,7 @@ def main():
             # NOTE: this is for CFG
             if class_embedder is not None:
                 # TODO: use class embedder to get class embeddings
-                class_emb = None
+                class_emb = class_embedder(labels)
             else:
                 # NOTE: if not cfg, set class_emb to None
                 class_emb = None
@@ -415,7 +415,7 @@ def main():
             # random sample 4 classes
             classes = torch.randint(0, args.num_classes, (4,), device=device)
             # TODO: fill pipeline
-            gen_images = pipeline(None)
+            gen_images = pipeline(batch_size=args.batch_size, num_inference_steps=args.num_inference_steps, classes=classes, guidance_scale=args.cfg_guidance_scale, generator=generator, device=device)
         else:
             # TODO: fill pipeline
             gen_images = pipeline(batch_size=args.batch_size, num_inference_steps=args.num_inference_steps, generator=generator, device=device)
