@@ -32,4 +32,4 @@ latent_ddpm: true
 cfg_guidance_scale: 2.0
 
 ckpt: experiments/exp-32-ddpm/checkpoints/checkpoint_epoch_19.pth
-wandb_key: 1f3706552b048908152fb1d827203f07685d8ef7
+wandb_key: 68abc6da5d0bfb1c67a41a153e2b2124341b0289
