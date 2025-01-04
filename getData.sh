@@ -1,5 +1,5 @@
 mkdir data
-mkdir experiment
+mkdir experiments
 python3 -m venv diffusionEnv
 source diffusionEnv/bin/activate
 pip install -r requirements.txt
