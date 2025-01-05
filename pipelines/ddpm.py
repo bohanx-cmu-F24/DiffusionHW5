@@ -114,7 +114,7 @@ class DDPMPipeline:
             if guidance_scale is not None and guidance_scale != 1.0:
                 # TODO: implement cfg
                 uncond_model_output, cond_model_output = model_output.chunk(2)
-                model_output = model_output
+                model_output = uncond_model_output + guidance_scale * (cond_model_output - uncond_model_output)
 
             assert torch.isfinite(model_output).all(), "NaN or Inf detected in model predictions!"
 
