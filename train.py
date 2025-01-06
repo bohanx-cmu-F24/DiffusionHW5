@@ -80,7 +80,7 @@ def parse_args():
     # cfg
     parser.add_argument("--use_cfg", type=str2bool, default=False, help="use cfg for conditional (latent) ddpm")
     parser.add_argument("--cfg_guidance_scale", type=float, default=2.0, help="cfg for inference")
-
+    parser.add_argument("--cfg_embed_dim", type=int, default=128, help="cfg embed dim")
     # ddim sampler for inference
     parser.add_argument("--use_ddim", type=str2bool, default=False, help="use ddim sampler for inference")
 
@@ -215,7 +215,7 @@ def main():
     class_embedder = None
     if args.use_cfg:
         # TODO:
-        class_embedder = ClassEmbedder(embed_dim=128, n_classes=args.num_classes)
+        class_embedder = ClassEmbedder(embed_dim=args.cfg_embed_dim, n_classes=args.num_classes)
 
     # send to device
     unet = unet.to(device)
