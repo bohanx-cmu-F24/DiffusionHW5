@@ -63,7 +63,7 @@ def main():
     class_embedder = None
     if args.use_cfg:
         # TODO: class embeder
-        class_embedder = ClassEmbedder(None)
+        class_embedder = ClassEmbedder(embed_dim=args.cfg_embed_dim, n_classes=args.num_classes)
         
     # send to device
 
@@ -106,19 +106,20 @@ def main():
         transforms.ToTensor(),
         transforms.Normalize((0.5,), (0.5,))
     ])
+
     if args.image_size == 32:
         val_dataset = datasets.CIFAR10(
             root=args.data_dir,transform=val_transform
         )
     else:
         val_dataset = datasets.ImageFolder(
-            root=args.data_dir, transform=val_transform
+            root=os.path.join(args.data_dir,"imagenet100_128x128/imagenet100_128x128/validate"), transform=val_transform
         )
 
     val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False)
 
     # WandB
-    wandb.login(key="1f3706552b048908152fb1d827203f07685d8ef7")
+    wandb.login(key=args.wandb_key)
     wandb_logger = wandb.init(
             project='ddpm',
             name="Inference 1",
