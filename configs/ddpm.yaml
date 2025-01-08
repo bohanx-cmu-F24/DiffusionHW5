@@ -11,10 +11,10 @@ num_epochs: 10 #NUM_EPOCHS
 learning_rate: 0.0001 #LR
 weight_decay: 0.0000 #WD
 num_train_timesteps: 10000 #TRAINING_TIMESTEPS
-num_inference_steps: 1000 #INFERENCE_TIMESTEPS
+num_inference_steps: 2500 #INFERENCE_TIMESTEPS
 beta_start: 2e-5 #BETA START
 beta_end: 2e-3 #BETA END
-beta_schedule: linear #BETA SCHEDULE
+beta_schedule: cosine #BETA SCHEDULE
 
 variance_type: fixed_large
 predictor_type: epsilon
@@ -27,7 +27,7 @@ unet_attn: [2, 3]
 unet_dropout: 0.05
 
 use_ddim: true
-use_cfg: true
+use_cfg: false
 latent_ddpm: false
 cfg_guidance_scale: 2.5
 
