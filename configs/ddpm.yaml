@@ -12,8 +12,8 @@ learning_rate: 0.0001 #LR
 weight_decay: 0.0000 #WD
 num_train_timesteps: 10000 #TRAINING_TIMESTEPS
 num_inference_steps: 2500 #INFERENCE_TIMESTEPS
-beta_start: 2e-5 #BETA START
-beta_end: 2e-3 #BETA END
+beta_start: 2e-6 #BETA START
+beta_end: 2e-2 #BETA END
 beta_schedule: cosine #BETA SCHEDULE
 
 variance_type: fixed_large
