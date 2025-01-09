@@ -6,7 +6,7 @@ image_size: 128
 batch_size: 16 #BATCH_SIZE
 accumulation_step: 32
 num_workers: 4 #NUM_WORKERS
-num_classes: 1024 #NUM_CLASSES
+num_classes: 256 #NUM_CLASSES
 num_epochs: 10 #NUM_EPOCHS
 learning_rate: 0.0001 #LR
 weight_decay: 0 #WD
@@ -24,12 +24,12 @@ unet_ch: 128
 unet_num_res_blocks: 4
 unet_ch_mult: [1, 2, 2, 4]
 unet_attn: [2, 3]
-unet_dropout: 0.05
+unet_dropout: 0.01
 
 use_ddim: true
 use_cfg: true
 latent_ddpm: false
-cfg_guidance_scale: 6.0
+cfg_guidance_scale: 7.5
 
 ckpt: experiments/exp-13-ddpm/checkpoints/checkpoint_epoch_9.pth
 wandb_key: 68abc6da5d0bfb1c67a41a153e2b2124341b0289
