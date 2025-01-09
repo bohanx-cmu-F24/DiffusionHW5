@@ -11,7 +11,7 @@ python train.py --config configs/ddpm.yaml
 **Inference and Evaluating**
 
 ```
-python inference.py inference.py
+python inference.py --config configs/ddpm.yaml
 ```
 
 # 1. Download the data

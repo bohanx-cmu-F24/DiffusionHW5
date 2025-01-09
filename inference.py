@@ -113,7 +113,7 @@ def main():
         )
     else:
         val_dataset = datasets.ImageFolder(
-            root=os.path.join(args.data_dir,"imagenet100_128x128/imagenet100_128x128/validate"), transform=val_transform
+            root=os.path.join(args.data_dir,"imagenet100_128x128/imagenet100_128x128/validation"), transform=val_transform
         )
 
     val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False)
