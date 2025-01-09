@@ -4,14 +4,14 @@ data_dir: ./data
 output_dir: ./experiments
 image_size: 128
 batch_size: 16 #BATCH_SIZE
-accumulation_step: 16
+accumulation_step: 32
 num_workers: 4 #NUM_WORKERS
 num_classes: 256 #NUM_CLASSES
 num_epochs: 10 #NUM_EPOCHS
 learning_rate: 0.0001 #LR
 weight_decay: 0.0000 #WD
 num_train_timesteps: 10000 #TRAINING_TIMESTEPS
-num_inference_steps: 2500 #INFERENCE_TIMESTEPS
+num_inference_steps: 35 #INFERENCE_TIMESTEPS
 beta_start: 2e-6 #BETA START
 beta_end: 2e-2 #BETA END
 beta_schedule: cosine #BETA SCHEDULE
@@ -27,9 +27,9 @@ unet_attn: [2, 3]
 unet_dropout: 0.05
 
 use_ddim: true
-use_cfg: false
+use_cfg: true
 latent_ddpm: false
-cfg_guidance_scale: 2.5
+cfg_guidance_scale: 7.5
 
 ckpt: experiments/exp-32-ddpm/checkpoints/checkpoint_epoch_19.pth
 wandb_key: 1f3706552b048908152fb1d827203f07685d8ef7
