@@ -6,7 +6,7 @@ image_size: 128
 batch_size: 16 #BATCH_SIZE
 accumulation_step: 32
 num_workers: 4 #NUM_WORKERS
-num_classes: 1024 #NUM_CLASSES
+num_classes: 150 #NUM_CLASSES
 num_epochs: 10 #NUM_EPOCHS
 learning_rate: 0.0001 #LR
 weight_decay: 0 #WD
