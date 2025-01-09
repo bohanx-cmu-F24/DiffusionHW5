@@ -116,7 +116,7 @@ def main():
             root=os.path.join(args.data_dir,"imagenet100_128x128/imagenet100_128x128/validation"), transform=val_transform
         )
 
-    val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False)
+    val_loader = DataLoader(val_dataset, batch_size=args.inference_batch_size, shuffle=False)
 
     # WandB
     wandb.login(key=args.wandb_key)
