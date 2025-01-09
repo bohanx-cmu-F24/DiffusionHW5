@@ -30,7 +30,7 @@ use_ddim: true
 use_cfg: true
 latent_ddpm: false
 cfg_guidance_scale: 7.5
-inference_batch_size: 4
+inference_batch_size: 1
 
 
 ckpt: experiments/exp-13-ddpm/checkpoints/checkpoint_epoch_9.pth
