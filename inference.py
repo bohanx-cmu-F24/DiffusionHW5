@@ -46,7 +46,7 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
     # setup model
-    logger.info("Creating model")
+    logger.info("Creating model Now")
     # unet
     unet = UNet(input_size=args.unet_in_size, input_ch=args.unet_in_ch, T=args.num_train_timesteps, ch=args.unet_ch, ch_mult=args.unet_ch_mult, attn=args.unet_attn, num_res_blocks=args.unet_num_res_blocks, dropout=args.unet_dropout, conditional=args.use_cfg, c_dim=args.unet_ch)
     # preint number of parameters
