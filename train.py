@@ -84,6 +84,9 @@ def parse_args():
     # ddim sampler for inference
     parser.add_argument("--use_ddim", type=str2bool, default=False, help="use ddim sampler for inference")
 
+    #
+    parser.add_argument("--inference_batch_size", type=int, default=50, help="Inference Batch Size")
+
     # checkpoint path for inference
     parser.add_argument("--ckpt", type=str, default=None, help="checkpoint path for inference")
 

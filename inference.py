@@ -133,8 +133,8 @@ def main():
     if args.use_cfg:
         # generate 50 images per class
         for i in tqdm(range(args.num_classes)):
-            logger.info(f"Generating 50 images for class {i}")
-            batch_size = 50
+            batch_size = args.inference_batch_size
+            logger.info(f"Generating {batch_size} images for class {i}")
             classes = torch.full((batch_size,), i, dtype=torch.long, device=device)
             gen_images_pil = pipeline(batch_size=batch_size, num_inference_steps=args.num_inference_steps, classes=classes, guidance_scale=args.cfg_guidance_scale, generator=generator, device=device)
             gen_images_tensor = torch.stack([val_transform(img) for img in gen_images_pil])
