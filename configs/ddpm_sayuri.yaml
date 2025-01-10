@@ -10,11 +10,11 @@ num_classes: 256 #NUM_CLASSES
 num_epochs: 10 #NUM_EPOCHS
 learning_rate: 0.0001 #LR
 weight_decay: 0.0001 #WD
-num_train_timesteps: 16000 #TRAINING_TIMESTEPS
+num_train_timesteps: 40000 #TRAINING_TIMESTEPS
 num_inference_steps: 25 #INFERENCE_TIMESTEPS
 beta_start: 0.00001 #BETA START
 beta_end: 0.01 #BETA END
-beta_schedule: linear #BETA SCHEDULE
+beta_schedule: cosine #BETA SCHEDULE
 
 variance_type: fixed_small
 predictor_type: epsilon
@@ -33,5 +33,5 @@ cfg_guidance_scale: 7.5
 inference_batch_size: 50
 
 
-ckpt: experiments/exp-13-ddpm/checkpoints/checkpoint_epoch_9.pth
+ckpt: experiments/exp-14-ddpm/checkpoints/checkpoint_epoch_9.pth
 wandb_key: 68abc6da5d0bfb1c67a41a153e2b2124341b0289
