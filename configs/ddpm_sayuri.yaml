@@ -10,7 +10,7 @@ num_classes: 256 #NUM_CLASSES
 num_epochs: 10 #NUM_EPOCHS
 learning_rate: 0.0001 #LR
 weight_decay: 0.0001 #WD
-num_train_timesteps: 40000 #TRAINING_TIMESTEPS
+num_train_timesteps: 16000 #TRAINING_TIMESTEPS
 num_inference_steps: 25 #INFERENCE_TIMESTEPS
 beta_start: 0.00001 #BETA START
 beta_end: 0.01 #BETA END
