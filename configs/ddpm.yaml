@@ -13,7 +13,7 @@ weight_decay: 0.0000 #WD
 num_train_timesteps: 20000 #TRAINING_TIMESTEPS
 num_inference_steps: 35 #INFERENCE_TIMESTEPS
 beta_start: 2e-6 #BETA START
-beta_end: 2e-2 #BETA END
+beta_end: 5e-3 #BETA END
 beta_schedule: linear #BETA SCHEDULE
 
 variance_type: fixed_large
