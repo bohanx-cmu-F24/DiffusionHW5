@@ -395,7 +395,7 @@ def main():
 
                 # TODO: step your optimizer
                 scaler.step(optimizer)
-                scaler.step(lr_scheduler)
+                lr_scheduler.step()
                 scaler.update()
                 optimizer.zero_grad()
 
