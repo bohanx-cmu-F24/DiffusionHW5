@@ -394,6 +394,7 @@ def main():
                     torch.nn.utils.clip_grad_norm_(unet.parameters(), args.grad_clip)
 
                 # TODO: step your optimizer
+                lr_scheduler.step()
                 scaler.step(optimizer)
                 scaler.update()
                 optimizer.zero_grad()
@@ -405,7 +406,6 @@ def main():
                 logger.info(f"Epoch {epoch+1}/{args.num_epochs}, Step {step}/{num_update_steps_per_epoch}, Loss {loss.item()} ({loss_m.avg})")
                 wandb_logger.log({'loss': loss_m.avg})
 
-            lr_scheduler.step()
 
             del noisy_images, noise, timesteps, model_pred, target
             torch.cuda.empty_cache()
