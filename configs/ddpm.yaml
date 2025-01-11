@@ -11,7 +11,7 @@ num_epochs: 10 #NUM_EPOCHS
 learning_rate: 0.0001 #LR
 weight_decay: 0.0000 #WD
 num_train_timesteps: 20000 #TRAINING_TIMESTEPS
-num_inference_steps: 25 #INFERENCE_TIMESTEPS
+num_inference_steps: 30 #INFERENCE_TIMESTEPS
 beta_start: 2e-6 #BETA START
 beta_end: 5e-3 #BETA END
 beta_schedule: linear #BETA SCHEDULE
