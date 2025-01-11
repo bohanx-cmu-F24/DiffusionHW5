@@ -394,8 +394,8 @@ def main():
                     torch.nn.utils.clip_grad_norm_(unet.parameters(), args.grad_clip)
 
                 # TODO: step your optimizer
-                lr_scheduler.step()
                 scaler.step(optimizer)
+                scaler.step(lr_scheduler)
                 scaler.update()
                 optimizer.zero_grad()
 
