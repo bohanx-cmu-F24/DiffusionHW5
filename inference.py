@@ -172,11 +172,11 @@ def main():
         # Update with generated images
         all_images = (all_images * 127.5 + 127.5).clamp(0, 255).to(torch.uint8).to(device)
         fid_metric.update(all_images, real=False)
-        is_metric.update(all_images)
+        # is_metric.update(all_images)
 
     # Compute FID and IS
     fid_score = fid_metric.compute()
-    is_score, _ = is_metric.compute()
+    # is_score, _ = is_metric.compute()
 
     logger.info(f"Frechet Inception Distance (FID): {fid_score}")
     logger.info(f"Inception Score (IS): {is_score}")
